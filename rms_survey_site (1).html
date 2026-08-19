@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RMS Feedback — LPU Division of Student Relationship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#EE7311;        /* LPU orange (primary) */
+    --maroon-deep:#B94F08;   /* deep burnt orange */
+    --gold:#161311;          /* black (accent) */
+    --gold-soft:#F5A623;     /* amber (logo top gradient) */
+    --ink:#211A14;
+    --paper:#FDF8F1;
+    --blush:#FCEAD7;         /* light orange tint */
+    --blush-2:#F6D4B2;
+    --line:#ECDDCC;
+    --green:#1E7B34;
+    --muted:#8C7B6B;
+    --white:#ffffff;
+    --shadow:0 24px 60px -20px rgba(185,79,8,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* grain / atmosphere */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(245,166,35,.14), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(238,115,17,.12), transparent 55%);
+    pointer-events:none;z-index:0;
+  }
+
+  .stage{
+    position:relative;z-index:1;
+    min-height:100vh;
+    display:grid;
+    grid-template-columns:340px 1fr;
+  }
+
+  /* ─── LEFT RAIL ─────────────────────────────── */
+  .rail{
+    background:linear-gradient(165deg,#F2911F 0%,#C0510A 55%,#6B2A05 100%);
+    color:#FCEEDD;
+    padding:44px 38px;
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    overflow:hidden;
+  }
+  .rail::after{
+    content:"";position:absolute;right:-120px;bottom:-120px;
+    width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(245,166,35,.35),transparent 65%);
+  }
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .brand .mark{
+    width:46px;height:46px;border-radius:50%;flex-shrink:0;
+    box-shadow:0 6px 16px rgba(0,0,0,.3);overflow:hidden;
+    background:#fff;
+  }
+  .brand .mark svg{display:block;width:100%;height:100%}
+  .brand .who{font-size:12px;line-height:1.35;letter-spacing:.02em;opacity:.9}
+  .brand .who b{display:block;font-size:13.5px;color:#fff;letter-spacing:.06em;font-weight:600}
+
+  .rail h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:34px;
+    line-height:1.08;
+    margin-top:40px;
+    letter-spacing:-.01em;
+    color:#fff;
+  }
+  .rail h1 em{font-style:italic;color:var(--gold-soft)}
+  .rail .sub{margin-top:16px;font-size:14px;line-height:1.6;opacity:.82;max-width:230px}
+
+  /* progress rail */
+  .track{margin-top:auto;padding-top:34px}
+  .track .pct{
+    font-family:'Fraunces',serif;font-size:15px;letter-spacing:.04em;
+    display:flex;justify-content:space-between;align-items:baseline;
+    opacity:.9;margin-bottom:12px;
+  }
+  .track .pct b{font-size:30px;color:var(--gold-soft);font-weight:600}
+  .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+  .bar > i{display:block;height:100%;width:0%;border-radius:99px;
+    background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+    transition:width .6s cubic-bezier(.4,0,.1,1);}
+  .dots{display:flex;gap:7px;margin-top:18px;flex-wrap:wrap}
+  .dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.2);transition:.4s}
+  .dots span.done{background:var(--gold-soft)}
+  .dots span.active{background:#fff;transform:scale(1.35);box-shadow:0 0 0 4px rgba(255,255,255,.15)}
+
+  /* ─── RIGHT PANEL ───────────────────────────── */
+  .panel{
+    display:flex;align-items:center;justify-content:center;
+    padding:56px 6vw;
+  }
+  .card{width:100%;max-width:640px;position:relative}
+
+  .step{display:none;animation:rise .55s cubic-bezier(.2,.7,.2,1) both}
+  .step.on{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--maroon);margin-bottom:20px;
+  }
+  .eyebrow .qn{
+    font-family:'Fraunces',serif;font-weight:600;
+    background:var(--maroon);color:#fff;border-radius:8px;
+    padding:2px 10px;font-size:13px;letter-spacing:.02em;
+  }
+  .eyebrow .rule{height:1px;width:34px;background:var(--gold)}
+
+  .q{
+    font-family:'Fraunces',serif;font-weight:500;
+    font-size:clamp(26px,4vw,38px);line-height:1.14;letter-spacing:-.012em;
+    color:var(--ink);margin-bottom:8px;
+  }
+  .hint{color:var(--muted);font-size:14.5px;margin-bottom:28px;line-height:1.5}
+
+  /* option cards */
+  .opts{display:flex;flex-direction:column;gap:11px}
+  .opt{
+    position:relative;display:flex;align-items:center;gap:15px;
+    padding:16px 18px;border:1.5px solid var(--line);border-radius:15px;
+    background:var(--white);cursor:pointer;
+    transition:transform .18s ease,border-color .18s,box-shadow .18s,background .18s;
+  }
+  .opt:hover{transform:translateX(4px);border-color:var(--blush-2);box-shadow:0 10px 24px -14px rgba(238,115,17,.35)}
+  .opt .tick{
+    width:24px;height:24px;border-radius:50%;flex-shrink:0;
+    border:2px solid var(--blush-2);display:grid;place-items:center;transition:.2s;
+  }
+  .opt .tick.sq{border-radius:7px}
+  .opt .tick svg{width:13px;height:13px;opacity:0;transform:scale(.4);transition:.2s}
+  .opt .lbl{font-size:15.5px;font-weight:500;color:var(--ink);line-height:1.35}
+  .opt .em{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:2px}
+
+  .opt.sel{border-color:var(--maroon);background:linear-gradient(180deg,#fff, var(--blush))}
+  .opt.sel .tick{border-color:var(--maroon);background:var(--maroon)}
+  .opt.sel .tick svg{opacity:1;transform:scale(1);stroke:#fff}
+  .opt.sel .lbl{color:var(--maroon-deep)}
+
+  /* scale variant */
+  .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .scale .opt{flex-direction:column;text-align:center;gap:10px;padding:18px 8px}
+  .scale .opt:hover{transform:translateY(-4px)}
+  .scale .face{font-size:26px;line-height:1}
+  .scale .opt .lbl{font-size:12.5px}
+  .scale .tick{display:none}
+
+  /* text inputs */
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12.5px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--maroon);margin-bottom:8px}
+  .field input,.field textarea{
+    width:100%;font-family:inherit;font-size:15.5px;color:var(--ink);
+    padding:15px 17px;border:1.5px solid var(--line);border-radius:13px;background:var(--white);
+    transition:border-color .2s,box-shadow .2s;resize:vertical;
+  }
+  .field textarea{min-height:120px;line-height:1.55}
+  .field input:focus,.field textarea:focus{
+    outline:none;border-color:var(--maroon);box-shadow:0 0 0 4px var(--blush);
+  }
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* nav */
+  .nav{display:flex;align-items:center;gap:14px;margin-top:34px}
+  .btn{
+    font-family:inherit;font-weight:600;font-size:15px;letter-spacing:.01em;
+    border:none;border-radius:13px;padding:15px 30px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:10px;transition:transform .16s,box-shadow .2s,background .2s;
+  }
+  .btn-primary{background:var(--maroon);color:#fff;box-shadow:0 14px 30px -12px rgba(238,115,17,.55)}
+  .btn-primary:hover{transform:translateY(-2px);background:var(--maroon-deep)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-ghost{background:transparent;color:var(--muted);padding:15px 14px}
+  .btn-ghost:hover{color:var(--maroon)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .spacer{flex:1}
+  .warn{color:#B23A48;font-size:13px;font-weight:500;opacity:0;transition:.3s;height:16px}
+  .warn.show{opacity:1}
+
+  /* intro + outro */
+  .lead{font-size:16px;line-height:1.65;color:#4b4048;max-width:520px;margin-bottom:12px}
+  .meta-badges{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 4px}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:var(--white);
+    border:1.5px solid var(--line);border-radius:99px;padding:9px 16px;font-size:13px;font-weight:500;color:#5b4f54}
+  .badge b{color:var(--maroon)}
+
+  .done-mark{
+    width:96px;height:96px;border-radius:50%;
+    background:linear-gradient(145deg,var(--green),#2ea44f);
+    display:grid;place-items:center;margin-bottom:26px;
+    box-shadow:0 20px 44px -16px rgba(30,123,52,.6);
+    animation:pop .6s cubic-bezier(.2,1.3,.4,1) both;
+  }
+  @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+  .done-mark svg{width:46px;height:46px;stroke:#fff}
+
+  .summary{margin-top:26px;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+  .summary .row{display:flex;justify-content:space-between;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line);font-size:14px}
+  .summary .row:last-child{border-bottom:none}
+  .summary .row .k{color:var(--muted);flex-shrink:0}
+  .summary .row .v{font-weight:600;color:var(--maroon-deep);text-align:right}
+
+  /* mobile */
+  @media(max-width:900px){
+    .stage{grid-template-columns:1fr}
+    .rail{position:relative;height:auto;padding:30px 26px}
+    .rail h1{margin-top:22px;font-size:27px}
+    .rail .sub{display:none}
+    .track{padding-top:24px}
+    .panel{padding:38px 24px 60px}
+    .scale{grid-template-columns:repeat(5,1fr);gap:6px}
+    .scale .opt{padding:12px 4px}
+    .scale .face{font-size:21px}
+    .two{grid-template-columns:1fr}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- LEFT RAIL -->
+  <aside class="rail">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="LPU">
+          <defs>
+            <clipPath id="ring"><circle cx="50" cy="50" r="42"/></clipPath>
+            <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#F7B733"/>
+              <stop offset="1" stop-color="#EE7311"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="48" fill="#161311"/>
+          <g clip-path="url(#ring)">
+            <rect x="2" y="2" width="96" height="96" fill="url(#sun)"/>
+            <g fill="#161311">
+              <polygon points="27,84 20,20 31,19"/>
+              <polygon points="27,84 40,15 51,18"/>
+              <polygon points="27,84 60,19 70,26"/>
+              <polygon points="27,84 78,32 85,43"/>
+              <polygon points="27,84 88,53 89,64"/>
+            </g>
+          </g>
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#fff" stroke-width="5"/>
+        </svg>
+      </div>
+      <div class="who"><b>LPU · DSR</b>Division of Student Relationship</div>
+    </div>
+    <h1>Your voice shapes the <em>RMS</em>.</h1>
+    <p class="sub">Nine quick questions on how the Request Management System is working for you. Honest feedback only — it stays confidential.</p>
+
+    <div class="track">
+      <div class="pct"><span>Progress</span><b id="pctNum">0%</b></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="dots" id="dots"></div>
+    </div>
+  </aside>
+
+  <!-- RIGHT PANEL -->
+  <main class="panel">
+    <div class="card">
+
+      <!-- INTRO -->
+      <section class="step on" data-step="intro">
+        <div class="eyebrow"><span class="rule"></span> RMS Feedback Survey · 2026</div>
+        <h2 class="q" style="margin-bottom:14px">Tell us how the RMS really feels to use.</h2>
+        <p class="lead">You're one of the students who actually lives with the Request Management System day to day. Three to four minutes here directly guides what the DSR team fixes next.</p>
+        <div class="meta-badges">
+          <span class="badge">⏱ <b>~3 min</b></span>
+          <span class="badge">🔒 <b>Confidential</b></span>
+          <span class="badge">📝 <b>9 questions</b></span>
+        </div>
+
+        <div class="two" style="margin-top:26px">
+          <div class="field">
+            <label>Registration No. <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:500">(8 digits)</span></label>
+            <input id="regno" type="text" inputmode="numeric" maxlength="8" placeholder="e.g. 12305537" autocomplete="off"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,8)"/>
+          </div>
+          <div class="field">
+            <label>Full Name</label>
+            <input id="sname" type="text" placeholder="e.g. Aditi Sharma" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="nav">
+          <div class="warn" id="w-intro">Please enter your 8-digit registration number to begin.</div>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="startSurvey()">Start survey
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- QUESTIONS INJECTED HERE -->
+      <div id="questions"></div>
+
+      <!-- OUTRO -->
+      <section class="step" data-step="done">
+        <div class="done-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="eyebrow" style="color:var(--green)"><span class="rule" style="background:var(--green)"></span> Response recorded</div>
+        <h2 class="q">Thank you — that's genuinely useful.</h2>
+        <p class="lead">Your feedback has been captured. The DSR team reviews every response to prioritise what gets improved in the RMS next.</p>
+        <div class="summary" id="summary"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   SURVEY DEFINITION  (all 9 questions + options)
+   ───────────────────────────────────────────── */
+const FACES = {
+  // sentiment faces for scale questions
+  pos2:"😍", pos1:"🙂", neu:"😐", neg1:"😕", neg2:"😞",
+  fast2:"⚡", fast1:"👍", slow1:"🐢", slow2:"🛑",
+  clear2:"💡", clear1:"✅", unclear1:"❓", unclear2:"🌫️",
+};
+
+const QUESTIONS = [
+  { id:"q1", type:"single", q:"How often do you use the RMS?",
+    hint:"Pick the option closest to your real usage.",
+    options:[
+      {v:"Daily",   em:"Almost every day"},
+      {v:"Weekly",  em:"A few times a week"},
+      {v:"Monthly", em:"Once or twice a month"},
+      {v:"Rarely",  em:"Only once in a while"},
+      {v:"Never",   em:"I have not used it yet"},
+    ]},
+
+  { id:"q2", type:"multi", q:"What type of issues do you most frequently log?",
+    hint:"Select all that apply — most students pick more than one.",
+    options:[
+      {v:"Inquiries",   em:"Asking for information"},
+      {v:"Complaints",  em:"Reporting a problem"},
+      {v:"Suggestions", em:"Ideas & feedback"},
+      {v:"Others",      em:"Something else"},
+    ]},
+
+  { id:"q3", type:"scale", q:"Rate your overall satisfaction with the RMS.",
+    hint:"How do you feel about the system as a whole?",
+    options:[
+      {v:"Very Satisfied",    face:FACES.pos2},
+      {v:"Satisfied",         face:FACES.pos1},
+      {v:"Neutral",           face:FACES.neu},
+      {v:"Dissatisfied",      face:FACES.neg1},
+      {v:"Very Dissatisfied", face:FACES.neg2},
+    ]},
+
+  { id:"q4", type:"scale", q:"How would you rate the response time for your tickets?",
+    hint:"Think about how long replies usually take.",
+    options:[
+      {v:"Very Fast", face:FACES.fast2},
+      {v:"Fast",      face:FACES.fast1},
+      {v:"Neutral",   face:FACES.neu},
+      {v:"Slow",      face:FACES.slow1},
+      {v:"Very Slow", face:FACES.slow2},
+    ]},
+
+  { id:"q5", type:"scale", q:"How clear and helpful are the responses you receive?",
+    hint:"Quality of the answers, not the speed.",
+    options:[
+      {v:"Very Clear and Helpful",     face:FACES.clear2, short:"Very Clear"},
+      {v:"Clear and Helpful",          face:FACES.clear1, short:"Clear"},
+      {v:"Neutral",                    face:FACES.neu,    short:"Neutral"},
+      {v:"Unclear and Unhelpful",      face:FACES.unclear1, short:"Unclear"},
+      {v:"Very Unclear and Unhelpful", face:FACES.unclear2, short:"Very Unclear"},
+    ]},
+
+  { id:"q6", type:"multi", q:"What challenges are you facing with the existing RMS?",
+    hint:"Select all that apply.",
+    options:[
+      {v:"Slow response time",                 em:"Replies take too long"},
+      {v:"Unclear responses",                  em:"Answers are vague or generic"},
+      {v:"Lack of follow-up",                  em:"No update after logging"},
+      {v:"Difficulty in navigating the system",em:"Hard to find things"},
+      {v:"Difficulty in logging a ticket",     em:"Submitting is confusing"},
+      {v:"Others",                             em:"Something else"},
+    ]},
+
+  { id:"q7", type:"text", q:"Describe any specific issue or problem you've hit.",
+    hint:"Optional — but specifics help us fix the right thing.",
+    placeholder:"e.g. My mess complaint was closed without any real action…"},
+
+  { id:"q8", type:"text", q:"What features or changes would make the RMS better?",
+    hint:"Optional — dream a little. What would make it effortless?",
+    placeholder:"e.g. Real-time ticket status tracking and notifications…"},
+
+  { id:"q9", type:"text", q:"Any other suggestions or feedback?",
+    hint:"Optional — anything else on your mind.",
+    placeholder:"e.g. Please take teacher-related complaints more seriously…"},
+];
+
+const answers = {};
+let order = ["intro", ...QUESTIONS.map(q=>q.id), "done"];
+let idx = 0;
+
+/* ── build question steps ── */
+const CHECK = `<svg viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
+const host = document.getElementById("questions");
+
+QUESTIONS.forEach((Q, qi)=>{
+  const sec = document.createElement("section");
+  sec.className = "step";
+  sec.dataset.step = Q.id;
+
+  let body = "";
+  if(Q.type==="single" || Q.type==="multi"){
+    body = `<div class="opts">` + Q.options.map(o=>`
+      <div class="opt" data-v="${o.v}" onclick="pick('${Q.id}','${Q.type}',this)">
+        <div class="tick ${Q.type==='multi'?'sq':''}">${CHECK}</div>
+        <div><span class="lbl">${o.v}</span>${o.em?`<span class="em">${o.em}</span>`:""}</div>
+      </div>`).join("") + `</div>`;
+  } else if(Q.type==="scale"){
+    body = `<div class="scale">` + Q.options.map(o=>`
+      <div class="opt" data-v="${o.v}" onclick="pick('${Q.id}','single',this)">
+        <div class="face">${o.face}</div>
+        <span class="lbl">${o.short||o.v}</span>
+        <div class="tick">${CHECK}</div>
+      </div>`).join("") + `</div>`;
+  } else {
+    body = `<div class="field"><textarea data-t="${Q.id}" placeholder="${Q.placeholder||''}"
+      oninput="answers['${Q.id}']=this.value"></textarea></div>`;
+  }
+
+  const optional = (Q.type==="text");
+  sec.innerHTML = `
+    <div class="eyebrow"><span class="qn">Q${qi+1}</span><span class="rule"></span> ${Q.type==='multi'?'Select all that apply':(optional?'Optional':'Choose one')}</div>
+    <h2 class="q">${Q.q}</h2>
+    <p class="hint">${Q.hint||""}</p>
+    ${body}
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="prev()">← Back</button>
+      <div class="warn" id="w-${Q.id}">Please choose an option to continue.</div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary" onclick="next('${Q.id}')">
+        ${qi===QUESTIONS.length-1?'Submit feedback':'Continue'}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>`;
+  host.appendChild(sec);
+});
+
+/* ── build progress dots ── */
+const dotsWrap = document.getElementById("dots");
+QUESTIONS.forEach(()=>{ const s=document.createElement("span"); dotsWrap.appendChild(s); });
+
+/* ── interactions ── */
+function pick(qid, type, el){
+  const box = el.parentElement;
+  if(type==="multi"){
+    el.classList.toggle("sel");
+    const chosen = [...box.querySelectorAll(".opt.sel")].map(o=>o.dataset.v);
+    answers[qid] = chosen;
+  } else {
+    box.querySelectorAll(".opt").forEach(o=>o.classList.remove("sel"));
+    el.classList.add("sel");
+    answers[qid] = el.dataset.v;
+  }
+  const w = document.getElementById("w-"+qid); if(w) w.classList.remove("show");
+}
+
+function show(i){
+  document.querySelectorAll(".step").forEach(s=>s.classList.remove("on"));
+  const key = order[i];
+  document.querySelector(`.step[data-step="${key}"]`).classList.add("on");
+  idx = i;
+  updateProgress();
+  document.querySelector(".panel").scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function updateProgress(){
+  // questions are order index 1..9
+  const qDone = Math.max(0, Math.min(idx, QUESTIONS.length)) ;
+  const pct = Math.round((Math.max(0,idx))/(order.length-1)*100);
+  document.getElementById("barFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct+"%";
+  [...dotsWrap.children].forEach((d,k)=>{
+    d.classList.remove("done","active");
+    if(k < idx-1) d.classList.add("done");
+    else if(k === idx-1) d.classList.add("active");
+  });
+}
+
+function startSurvey(){
+  const reg = document.getElementById("regno").value.trim();
+  const nm  = document.getElementById("sname").value.trim();
+  if(!/^\d{8}$/.test(reg)){ document.getElementById("w-intro").classList.add("show"); return; }
+  answers._regno = reg;
+  answers._name  = nm;
+  answers._time  = new Date().toISOString();
+  show(1);
+}
+
+function next(qid){
+  const Q = QUESTIONS.find(q=>q.id===qid);
+  const required = (Q.type!=="text");
+  const val = answers[qid];
+  const empty = required && (val===undefined || (Array.isArray(val)&&val.length===0));
+  if(empty){ document.getElementById("w-"+qid).classList.add("show"); return; }
+
+  // Last question → submit for real, then show thank-you
+  if(qid === QUESTIONS[QUESTIONS.length-1].id){
+    submitSurvey(qid);
+    return;
+  }
+  if(idx < order.length-1) show(idx+1);
+}
+
+function submitSurvey(qid){
+  const btn = document.querySelector(`.step[data-step="${qid}"] .btn-primary`);
+  if(btn){ btn.disabled = true; btn.innerHTML = "Submitting…"; }
+  answers._time = new Date().toISOString();
+
+  // fire-and-forget send (no-cors won't return a readable response)
+  submitToBackend(answers);
+
+  // give the request a moment to leave the browser, then advance
+  setTimeout(()=>{ buildSummary(); show(order.indexOf("done")); }, 900);
+}
+
+function prev(){ if(idx>0) show(idx-1); }
+
+/* keyboard: Enter advances */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    const cur = order[idx];
+    if(cur==="intro"){ e.preventDefault(); startSurvey(); }
+    else if(cur!=="done" && document.activeElement.tagName!=="TEXTAREA"){
+      e.preventDefault(); next(cur);
+    }
+  }
+});
+
+function buildSummary(){
+  const s = document.getElementById("summary");
+  const rows = [
+    ["Registration No.", answers._regno||"—"],
+    ["Name", answers._name||"—"],
+    ["Q1 · Usage", answers.q1||"—"],
+    ["Q2 · Issue types", (answers.q2||[]).join(", ")||"—"],
+    ["Q3 · Satisfaction", answers.q3||"—"],
+    ["Q4 · Response time", answers.q4||"—"],
+    ["Q5 · Clarity", answers.q5||"—"],
+    ["Q6 · Challenges", (answers.q6||[]).join(", ")||"—"],
+  ];
+  s.innerHTML = rows.map(r=>`<div class="row"><span class="k">${r[0]}</span><span class="v">${r[1]}</span></div>`).join("");
+}
+
+/* ── Google Apps Script backend ── */
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyfhvcAc597qLH9apJjwYx07i12SPwHTqG3pWNCttnbm3KbFhMrrFFBVPuV2TOmf8g6/exec";
+function submitToBackend(data){
+  if(!BACKEND_URL) return;
+  fetch(BACKEND_URL,{
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(data)
+  }).catch(()=>{});
+}
+
+updateProgress();
+</script>
+</body>
+</html>
